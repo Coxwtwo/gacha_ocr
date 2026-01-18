@@ -1,4 +1,4 @@
-# modules/ocr_image2json.py
+# modules/batch_image2json.py
 import json
 import re
 from pathlib import Path

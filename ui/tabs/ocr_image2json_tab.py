@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QPixmap, QPainter, QTransform
 from PySide6.QtWidgets import QScrollArea, QGraphicsView, QGraphicsScene, QSlider
-from modules.ocr_image2json import OcrImageProcessor, ErrorEntryManager
+from modules.batch_image2json import OcrImageProcessor, ErrorEntryManager
 from functools import partial
 
 
