@@ -1,1 +1,13 @@
+# Python Tools for Visual Studio (PTVS)
+__pycache__/
+*.pyc
+
+# input and output files
+data/input_images/*
+data/output_images/*
+data/history/*
+data/errors/*
+logs
+
+# other
 GitReference.txt
