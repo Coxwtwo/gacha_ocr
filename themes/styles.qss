@@ -1,0 +1,102 @@
+/* 全局应用程序样式 */
+QWidget {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* 主窗口样式 */
+QMainWindow {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: none;
+}
+
+/* 标签样式 */
+QLabel {
+    background-color: transparent;
+    color: #333333;
+    font-size: 12px;
+}
+
+/* 按钮样式 - 圆角 */
+QPushButton {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #dadbde);
+    border: 1px solid #8f8f91;
+    padding: 8px;
+    min-width: 40px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e0e0e0, stop: 1 #d0d0d0);
+}
+
+QPushButton:pressed {
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #d0d0d0, stop: 1 #a0a0a0);
+    border: 1px solid #6f6f71;
+}
+
+/* 文本编辑框样式 - 圆角设计 */
+QTextEdit {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #cccccc;
+    padding: 8px;
+    font-size: 13px;
+}
+
+/* 组合框样式 - 圆角设计 */
+QComboBox {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #bcbcbc;
+    padding: 6px;
+    min-width: 60px;
+    font-size: 13px;
+}
+
+/* 数值调节框样式 - 圆角设计 */
+QDoubleSpinBox {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #bcbcbc;
+    padding: 6px;
+    font-size: 13px;
+}
+
+/* 滚动区域样式 */
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+/* 分割线样式 */
+QSplitter::handle {
+    background-color: rgba(200, 200, 200, 0.5);
+}
+
+/* 标签页样式 */
+QTabWidget::pane {
+    border: 1px solid #cccccc;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+}
+
+QTabBar::tab {
+    background-color: rgba(200, 200, 200, 0.5);
+    border: 1px solid #cccccc;
+    border-bottom-color: #cccccc;
+    border-top-left-radius: 10px; /* 标签页圆角 */
+    border-top-right-radius: 10px;
+    min-width: 100px;
+    padding: 8px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* 输入框样式 */
+QLineEdit {
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid #bcbcbc;
+    padding: 6px;
+    font-size: 13px;
+}
