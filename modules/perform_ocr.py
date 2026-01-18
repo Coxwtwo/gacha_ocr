@@ -14,7 +14,6 @@ def perform_ocr(img: Image.Image, lang: str = "chi_sim", logger=None) -> Optiona
         logger = get_logger()
     try:
         text = pytesseract.image_to_string(img, lang=lang)
-        logger.info(f"OCR识别结果:\n{text}")
         return text.strip() if text else None
     except Exception as e:
         logger.error(f"[OCR] 识别失败: {e}")

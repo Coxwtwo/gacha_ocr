@@ -106,6 +106,4 @@ def test_ocr_with_config(image_path, config, lang='chi_sim', custom_bounds=None,
     if ocr_text is None:
         logger.error(f"OCR failed for image: {image_path}")
         return None
-    else:
-        logger.info(f"OCR result for {image_path}:\n{ocr_text}")
     return ocr_text

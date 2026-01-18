@@ -189,8 +189,12 @@ class BatchTab(QWidget):
         except Exception as e:
             self.log(f"批量处理过程中出现错误: {e}")
 
-    def log(self, text):
-        self.log_output.append(text)
+    def log(self, message):
+        """向日志输出添加消息"""
+        from modules.logger_manager import get_logger
+        logger = get_logger(self.config_manager)
+        logger.info(message)
+        self.log_output.append(message)
 
     def load_errors(self):
         """加载错误列表"""
@@ -271,9 +275,11 @@ class BatchTab(QWidget):
         self.error_manager.update_error_status(error_entry, "ignored")
         self.error_log(f"已忽略条目: {error_entry['original']}")
         self.load_errors()  # 重新加载列表
-
     def error_log(self, message):
-        """向错误日志输出添加消息"""
+        """向错误修正模块日志输出添加消息"""
+        from modules.logger_manager import get_logger
+        logger = get_logger(self.config_manager)
+        logger.info(message)
         self.error_log_output.append(message)
 
 
