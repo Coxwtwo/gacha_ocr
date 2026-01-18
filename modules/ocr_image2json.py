@@ -186,7 +186,7 @@ def process_single_image(game_id: str, image_path: str, config: Dict, clean_conf
     if not ocr_text:
         logger.warning(f"[警告] 图像 {Path(image_path).name} OCR识别失败")
         return []
-    
+
     # 解析文本
     raw_entries = parse_ocr_text_to_entries(ocr_text, config, logger)
     
@@ -205,7 +205,6 @@ def process_single_image(game_id: str, image_path: str, config: Dict, clean_conf
         )
         if cleaned_entry:
             cleaned_entries.append(cleaned_entry)
-    
     logger.info(f"从 {Path(image_path).name} 提取到 {len(cleaned_entries)} 个有效条目")
     return cleaned_entries
 
@@ -383,10 +382,21 @@ def run_pipeline(
         # 保存并合并文件
         final_file = save_and_merge_file(export_data, output_folder, game_id, logger)
         
-        # 输出错误统计
+        # 输出错误统计并追加 final_file 路径到 error.json
         if error_manager:
             pending_errors = error_manager.get_pending_errors()
             logger.info(f"发现 {len(pending_errors)} 个待人工修正的错误条目")
+
+            # 追加 final_file 路径到每个错误条目
+            if len(pending_errors) > 0:
+                with open(error_manager.file_path, 'r+', encoding='utf-8') as f:
+                    errors = json.load(f)
+                    for error in errors:
+                        error['context']['json_path'] = str(final_file)
+                    f.seek(0)
+                    json.dump(errors, f, ensure_ascii=False, indent=2)
+                    f.truncate()
+
             logger.info("错误条目已保存，可在错误修正标签页中处理")
         
         logger.info("\n" + "=" * 60)

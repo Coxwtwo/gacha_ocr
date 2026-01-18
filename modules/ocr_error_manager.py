@@ -69,13 +69,15 @@ class ErrorEntryManager:
     
 
     def update_error_status(self, error_entry, new_status, corrected_data=None):
-        """更新错误条目的状态"""
-        if not self.file_path.exists():
-            return
-        
+        """更新错误条目的状态，并将修正后的数据写回 JSON 数据文件"""
+
         with open(self.file_path, 'r', encoding='utf-8') as f:
-            errors = json.load(f)
-        
+            try:
+                errors = json.load(f)
+            except json.JSONDecodeError as e:
+                self.logger.error(f"无法解析错误文件 {self.file_path}: {e}")
+                return
+
         updated = False
         for i, e in enumerate(errors):
             if (e["original"] == error_entry["original"] and 
@@ -84,9 +86,38 @@ class ErrorEntryManager:
                 if corrected_data:
                     errors[i]["corrected"] = corrected_data
                     errors[i]["corrected_at"] = datetime.now().isoformat()
+
+                    # 写回 JSON 数据文件
+                    json_path = e["context"].get("json_path")
+                    if json_path and Path(json_path).exists():
+
+                        try:
+                            with open(json_path, 'r+', encoding='utf-8') as data_file:
+                                try:
+                                    data = json.load(data_file)
+                                except json.JSONDecodeError as e:
+                                    self.logger.error(f"无法解析 JSON 数据文件 {json_path}: {e}")
+                                    continue
+
+                                # 更新数据条目
+                                for entry in data.get("data", []):
+                                    if (entry["item"] == error_entry["original"]["item"] and
+                                        entry["pool"] == error_entry["original"]["pool"] and
+                                        entry["time"] == error_entry["original"]["time"] ):
+                                        entry.update(corrected_data)
+                                        # 将 is_valid 设置为 True
+                                        entry['is_valid'] = True
+
+                                # 写回文件
+                                data_file.seek(0)
+                                json.dump(data, data_file, ensure_ascii=False, indent=2)
+                                data_file.truncate()
+                        except Exception as e:
+                            self.logger.error(f"无法更新 JSON 数据文件 {json_path}: {e}")
+
                 updated = True
                 break
-        
+
         if updated:
             with open(self.file_path, 'w', encoding='utf-8') as f:
                 json.dump(errors, f, ensure_ascii=False, indent=2)
