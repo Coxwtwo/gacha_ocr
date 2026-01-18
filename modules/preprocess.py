@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+from typing import Dict
 
 def preprocess_image(img, game_id):
     """
@@ -29,3 +30,15 @@ def preprocess_image_for_arknights(img):
     img_array[mask, :3] = [0, 0, 0]
     
     return Image.fromarray(img_array)
+
+def crop_image_to_table(img: Image.Image, config: Dict) -> Image.Image:
+    """
+    裁剪图像到表格区域
+    """
+    bounds = config["table_area"]["bounds"]
+    w, h = img.size
+    left = int(w * bounds["left_ratio"])
+    right = int(w * bounds["right_ratio"])
+    top = int(h * bounds["top_ratio"])
+    bottom = int(h * bounds["bottom_ratio"])
+    return img.crop((left, top, right, bottom))

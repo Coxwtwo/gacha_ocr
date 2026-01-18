@@ -1,25 +1,10 @@
 from PIL import Image
 import numpy as np
-import pytesseract
 import matplotlib.pyplot as plt
 import os
 from pathlib import Path
 from .logger_manager import get_logger
-
-# Windows系统需要设置路径
-pytesseract.pytesseract.tesseract_cmd = r'tools\Tesseract-OCR\tesseract.exe'
-
-# Helper function to apply OCR on an image
-def try_ocr(img, lang='chi_sim', logger=None):
-    if logger is None:
-        logger = get_logger()
-    try:
-        # Ensure pytesseract is installed and use Chinese language and English language
-        txt = pytesseract.image_to_string(img, lang=lang)
-        return txt
-    except Exception as e:
-        logger.error(f"OCR failed: {e}")
-        return None
+from .perform_ocr import perform_ocr
 
 # Crop the table area from the image (assumes right part of the image contains the table)
 def crop_table_area(img, config=None):
@@ -41,36 +26,13 @@ def crop_table_area(img, config=None):
         bottom = int(h * 0.854)
         return img.crop((left, top, right, bottom))
 
-def improve_for_ocr(img: Image.Image) -> Image.Image:
-    """
-    对图片进行预处理以提高 OCR 准确率
-    """
-    im = img.copy()
-    img_array = np.array(im)
-    # 将特定颜色的像素（RGB(31,31,31)以及一定范围内相似的像素）设为黑色
-    target_color = np.array([31, 31, 31])
-    tolerance = 15
-    
-    # 计算颜色差异
-    color_diff = np.abs(img_array[:, :, :3] - target_color)
-    mask = np.all(color_diff <= tolerance, axis=2)
-    
-    # 统一处理方式：无论图像模式如何，都只设置RGB通道为黑色
-    # 对于有alpha通道的图像，alpha通道保持不变
-    img_array[mask, :3] = [0, 0, 0]
-    # 返回处理后的 PIL.Image
-    processed_img = Image.fromarray(img_array)    
-
-    return processed_img
-
 # Function to process images
 def process_image(image_path, config=None, logger=None):
     if logger is None:
         logger = get_logger()
     img = Image.open(image_path)
     table = crop_table_area(img, config)  # Crop table area
-    proc = improve_for_ocr(table)  # Improve for OCR
-    ocr_text = try_ocr(proc, logger=logger)  # Run OCR
+    ocr_text = perform_ocr(table, logger=logger)  # Run OCR
 
     # Show both original and processed images for visual comparison
     plt.figure(figsize=(12, 6))
@@ -83,7 +45,7 @@ def process_image(image_path, config=None, logger=None):
 
     # Processed image (cropped and enhanced)
     plt.subplot(1, 2, 2)
-    plt.imshow(proc, cmap="gray")
+    plt.imshow(table, cmap="gray")
     plt.title("Processed Image (Cropped & Enhanced)")
     plt.axis('off')
 
@@ -122,8 +84,7 @@ def test_ocr_with_config(image_path, config, lang='chi_sim', custom_bounds=None,
     else:
         table = crop_table_area(img, config)
         
-    proc = improve_for_ocr(table)  # Improve for OCR
-    ocr_text = try_ocr(proc, lang=lang, logger=logger)  # Run OCR with specified language
+    ocr_text = perform_ocr(table, lang=lang, logger=logger)  # Run OCR with specified language
 
     # Show both original and processed images for visual comparison
     plt.figure(figsize=(12, 6))
@@ -136,7 +97,7 @@ def test_ocr_with_config(image_path, config, lang='chi_sim', custom_bounds=None,
 
     # Processed image (cropped and enhanced)
     plt.subplot(1, 2, 2)
-    plt.imshow(proc, cmap="gray")
+    plt.imshow(table, cmap="gray")
     plt.title("Processed Image (Cropped & Enhanced)")
     plt.axis('off')
 
