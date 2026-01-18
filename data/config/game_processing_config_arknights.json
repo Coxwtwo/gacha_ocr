@@ -1,0 +1,32 @@
+{
+  "last_updated": "2025-12-09",
+  "game_info": {
+    "game_id": "arknights",
+    "game_name": "明日方舟"
+  },
+  "table_area": {
+    "column_indices": {
+      "item": 1,
+      "pool": 0,
+      "time": 2
+    },
+    "bounds": {
+      "left_ratio": 0.25,
+      "right_ratio": 0.91,
+      "top_ratio": 0.28,
+      "bottom_ratio": 0.85
+    }
+  },
+  "text_processing": {
+    "enable_clean_name": true,
+    "patterns": {
+      "prefix_patterns": [
+        "NEW"
+      ],
+      "suffix_patterns": [
+        "\\(\\d+.*?\\)",
+        "\\(.*?\\)"
+      ]
+    }
+  }
+}

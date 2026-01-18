@@ -1,0 +1,83 @@
+{
+    "last_updated": "2025-12-09",
+    "game_info": {
+        "game_id": "arknights",
+        "game_name": "明日方舟"
+    },
+    "pool_type": [
+        {
+            "code": "01",
+            "name": "常驻角色征集",
+            "alias": "standard",
+            "description": "常驻角色池，保底不与其他类型征集共享"
+        },
+        {
+            "code": "02",
+            "name": "限时角色征集",            
+            "alias": "rerun_character",
+            "description": "轮换征集，提升老角色获得概率，保底与限时角色征集类型征集共享"
+        }
+    ],
+    "item_type": [
+        {
+            "code": "01",
+            "name": "角色",
+            "alias": "character"
+        },
+        {
+            "code": "02",
+            "name": "心相",
+            "alias": "weapon"
+        }
+    ],
+    "pool": {
+        "01001": {
+            "display_name": "空白频段",
+            "pool_type": "01",
+            "carry_over": false,
+            "alias": "常驻角色征集"
+        },
+        "02066": {
+            "display_name": "以风雪为誓",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
+        "03001": {
+            "display_name": "人偶",
+            "pool_type": "03",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时版本征集"
+        }
+    },
+    "item": {
+        "010001": {
+            "display_name": "真言",
+            "item_type": "01",
+            "rarity": 2
+        },
+        "010002": {
+            "display_name": "流星",
+            "item_type": "01",
+            "rarity": 2
+        },
+        "010003": {
+            "display_name": "松果",
+            "item_type": "01",
+            "rarity": 3
+        },
+        "010004": {
+            "display_name": "渡桥",
+            "item_type": "01",
+            "rarity": 3
+        }
+    }
+}

@@ -1,0 +1,29 @@
+{
+  "last_updated": "2025-12-09",
+  "game_info": {
+    "game_id": "reverse1999",
+    "game_name": "重返未来：1999"
+  },
+  "table_area": {
+    "column_indices": {
+      "item": 0,
+      "pool": 1,
+      "time": 2
+    },
+    "bounds": {
+      "left_ratio": 0.28,
+      "right_ratio": 0.93,
+      "top_ratio": 0.28,
+      "bottom_ratio": 0.84
+    }
+  },
+  "text_processing": {
+    "enable_clean_name": true,
+    "patterns": {
+      "prefix_patterns": [],
+      "suffix_patterns": [
+        "\\(\\d+.*?\\)"
+      ]
+    }
+  }
+}
