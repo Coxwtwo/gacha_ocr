@@ -1,12 +1,11 @@
-# ui/tabs/analysis_tab.py
 from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton, QFileDialog, QPushButton, 
     QTextEdit, QComboBox, QHBoxLayout, QLabel, QTabWidget, 
-    QScrollArea, QSlider, QGraphicsView, QGraphicsScene
+    QSlider, QGraphicsView, QGraphicsScene
 )
-from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QTransform
+from PySide6.QtGui import QPixmap, QPainter, QTransform
 
 from modules.history_analyzer import GachaAnalyzer
 

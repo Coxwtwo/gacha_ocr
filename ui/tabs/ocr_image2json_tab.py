@@ -1,4 +1,3 @@
-# ui/tabs/ocr_image2json_tab.py
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, 
@@ -14,10 +13,12 @@ from PySide6.QtWidgets import (
     QTableWidgetItem,
     QHeaderView,
     QDialog,
-    QFormLayout
+    QFormLayout,
+    QGraphicsView,
+    QGraphicsScene,
+    QSlider
 )
 from PySide6.QtGui import QPixmap, QPainter, QTransform
-from PySide6.QtWidgets import QScrollArea, QGraphicsView, QGraphicsScene, QSlider
 from modules.batch_image2json import OcrImageProcessor, ErrorEntryManager
 from functools import partial
 

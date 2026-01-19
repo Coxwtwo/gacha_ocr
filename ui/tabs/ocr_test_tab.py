@@ -1,7 +1,5 @@
-# ui/tabs/ocr_test_tab.py
 from pathlib import Path
 import json
-from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QWidget, 
     QHBoxLayout, 
@@ -13,7 +11,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QDoubleSpinBox
 )
-from PySide6.QtGui import QPainter, QPen, QColor
 
 from ui.widgets.image_viewer import ImageViewer
 

@@ -1,8 +1,6 @@
 from PIL import Image
-import numpy as np
 import matplotlib.pyplot as plt
 import os
-from pathlib import Path
 from .logger_manager import get_logger
 from .perform_ocr import perform_ocr
 

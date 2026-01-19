@@ -1,16 +1,13 @@
-# modules/batch_image2json.py
 import json
-import re
 from pathlib import Path
 from typing import List, Dict, Union, Optional, Tuple
 from PIL import Image
 from .perform_ocr import perform_ocr
 from datetime import datetime
-import numpy as np
 from .config_loader import ConfigManager
 from .logger_manager import get_logger
 from .preprocess import preprocess_image, crop_image_to_table
-from .data_processor import fix_timestamp_format, clean_and_correct_entry, parse_ocr_text_to_entries
+from .data_processor import clean_and_correct_entry, parse_ocr_text_to_entries
 from .json_file_handler import load_json_file, save_json_file
 from .ocr_error_manager import ErrorEntryManager
 

@@ -1,7 +1,6 @@
 from pathlib import Path
 from datetime import datetime
 import json
-from typing import Dict, Optional
 from .logger_manager import get_logger
 
 class ErrorEntryManager:

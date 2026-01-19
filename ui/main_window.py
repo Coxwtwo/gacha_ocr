@@ -1,15 +1,9 @@
-# ui/main_window.py
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QMainWindow,
     QTabWidget,
-    QVBoxLayout,
     QStatusBar,
-    QFileDialog,
     QMessageBox,
-    QWidget,
-    QLabel
 )
 
 from ui.tabs.ocr_test_tab import OcrTestTab
