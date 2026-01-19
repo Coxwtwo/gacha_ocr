@@ -82,17 +82,6 @@ class ConfigManager:
         
         with open(name_path, 'r', encoding='utf-8') as f:
             return json.load(f)
-    
-    def get_available_games(self) -> list:
-        """获取可用的游戏列表"""
-        config_dir_path = Path("data/config")
-        game_files = list(config_dir_path.glob("game_processing_config_*.json"))
-        games = []
-        for file in game_files:
-            game_id = file.stem.replace("game_processing_config_", "")
-            games.append(game_id)
-        return games
-
     def get_available_games_with_names(self):
         """获取可用游戏列表，格式为 [(game_id, game_name), ...]"""
         games = []
