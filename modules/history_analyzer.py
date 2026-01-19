@@ -33,7 +33,7 @@ def create_pool_mapping(catalog_data):
     return pool_mapping
 
 def analyze_gacha_data(gacha_data, catalog_data):
-    """优化后的分析抽卡数据逻辑"""
+    """分析抽卡数据逻辑"""
     # 创建映射
     item_mapping = create_item_mapping(catalog_data)
     pool_mapping = create_pool_mapping(catalog_data)
@@ -84,8 +84,8 @@ def analyze_gacha_data(gacha_data, catalog_data):
 
         # 检查是否出6星
         if rarity == 6:
-            if pool_stats[pool_name]['last_gold_pull'] != -1:
-                pool_stats[pool_name]['gold_pulls'].append(pool_stats[pool_name]['current_pity'])
+            # 记录当前的抽数
+            pool_stats[pool_name]['gold_pulls'].append(pool_stats[pool_name]['current_pity'])
             pool_stats[pool_name]['last_gold_pull'] = idx
             pool_stats[pool_name]['current_pity'] = 0
 
@@ -116,13 +116,7 @@ def calculate_statistics(pool_stats):
         # 3. 保底进度
         pity_progress = stats['current_pity']
         
-        # 4. 欧非程度分析
-        if gold_pulls:
-            avg_gold_pulls = sum(gold_pulls) / len(gold_pulls)
-        else:
-            avg_gold_pulls = None
-        
-        # 5. 出金率
+        # 4. 出金率
         gold_rate = rarity_counts[6] / total_pulls * 100 if total_pulls > 0 else 0
         
         results[pool_name] = {
@@ -130,7 +124,6 @@ def calculate_statistics(pool_stats):
             'rarity_distribution': rarity_distribution,
             'pity_progress': pity_progress,
             'gold_pulls_history': gold_pulls,
-            'avg_gold_pulls': avg_gold_pulls,
             'gold_rate': gold_rate,
             'rarity_counts': rarity_counts
         }
@@ -138,150 +131,99 @@ def calculate_statistics(pool_stats):
     return results
 
 
-def print_analysis_report(results, pool_stats, pool_mapping, item_mapping, uid):
+def analysis_report(results, pool_stats, pool_mapping, game_name, uid):
     current_logger = get_logger()
-    current_logger.info("=" * 60)
-    current_logger.info("           重返未来：1999 抽卡记录分析报告")
-    current_logger.info("=" * 60)
-    
-    # 显示UID（从原始数据中提取）
-    current_logger.info(f"用户UID: {uid}")  # 这里使用实际的UID
-    
+    report_lines = []
+    report_lines.append("=" * 60)
+    report_lines.append(f"{game_name}抽卡记录分析报告")
+    report_lines.append(f"用户UID: {uid}")
+    report_lines.append("=" * 60)
+
     total_pulls_all = sum(stats['total_pulls'] for stats in pool_stats.values())
     total_6_star = sum(stats['rarity_counts'][6] for stats in pool_stats.values())
-    
-    current_logger.info(f"\n📊 总体统计:")
-    current_logger.info(f"   总抽取次数: {total_pulls_all}次")
-    current_logger.info(f"   6星获取数量: {total_6_star}个")
+
+    report_lines.append(f"\n📊 总体统计:")
+    report_lines.append(f"   总抽取次数: {total_pulls_all}次")
+    report_lines.append(f"   6星获取数量: {total_6_star}个")
     if total_pulls_all > 0:
-        current_logger.info(f"   综合6星获取率: {total_6_star/total_pulls_all*100:.2f}%")
+        report_lines.append(f"   综合6星获取率: {total_6_star/total_pulls_all*100:.2f}%")
     else:
-        current_logger.info(f"   综合6星获取率: 0.00%")
-    
-    current_logger.info(f"\n🔍 各卡池详细分析:")
-    current_logger.info("-" * 60)
-    
+        report_lines.append(f"   尚未获得6星")
+
+    report_lines.append(f"\n🔍 各卡池详细分析:")
+    report_lines.append("-" * 60)
+
     for pool_name, stats in results.items():
-        pool_info = pool_mapping.get(pool_name, {})
-        pool_type_name = pool_info.get('alias', '未知卡池类型')
-        
-        current_logger.info(f"\n🎯 卡池: {pool_name} ({pool_type_name})")
-        current_logger.info(f"   ├─ 总抽取次数: {stats['total_pulls']}次")
-        current_logger.info(f"   ├─ 稀有度分布:")
-        current_logger.info(f"   │   ├─ 2星: {stats['rarity_counts'][2]}个")
-        current_logger.info(f"   │   ├─ 3星: {stats['rarity_counts'][3]}个")
-        current_logger.info(f"   │   ├─ 4星: {stats['rarity_counts'][4]}个")
-        current_logger.info(f"   │   ├─ 5星: {stats['rarity_counts'][5]}个")
-        current_logger.info(f"   │   └─ 6星: {stats['rarity_counts'][6]}个")
-        
-        current_logger.info(f"   ├─ 当前保底进度: {stats['pity_progress']}抽未出6星")
-        
-        if stats['gold_pulls_history']:
-            current_logger.info(f"   ├─ 出金间隔: {', '.join(map(str, stats['gold_pulls_history']))}")
-            current_logger.info(f"   ├─ 平均出金抽数: {stats['avg_gold_pulls']:.1f}抽/6星")
-            current_logger.info(f"   └─ 6星获取率: {stats['gold_rate']:.2f}%")
+        this_pool = pool_mapping.get(pool_name, {})
+        pool_type_name = this_pool.get('alias', '未知卡池类型')
+
+        report_lines.append(f"\n🎯 卡池: {pool_name} ({pool_type_name})")
+        report_lines.append(f"   ├─ 总抽取次数: {stats['total_pulls']}次")
+        report_lines.append(f"   ├─ 稀有度分布:")
+        report_lines.append(f"   │   ├─ 2星: {stats['rarity_counts'][2]}个")
+        report_lines.append(f"   │   ├─ 3星: {stats['rarity_counts'][3]}个")
+        report_lines.append(f"   │   ├─ 4星: {stats['rarity_counts'][4]}个")
+        report_lines.append(f"   │   ├─ 5星: {stats['rarity_counts'][5]}个")
+        report_lines.append(f"   │   └─ 6星: {stats['rarity_counts'][6]}个")
+
+        report_lines.append(f"   ├─ 当前保底进度: {stats['pity_progress']}抽未出6星")
+
+        if stats['rarity_counts'][6] > 0:
+            avg_gold_pull = stats['total_pulls'] / stats['rarity_counts'][6]
+            report_lines.append(f"   ├─ 平均出金抽数: {avg_gold_pull:.1f}抽")
+            report_lines.append(f"   └─ 6星获取率: {stats['gold_rate']:.2f}%")
         else:
-            current_logger.info(f"   └─ 尚未获得6星")
-    
-    current_logger.info(f"\n🎲 欧非程度评估:")
-    current_logger.info("-" * 60)
-    
-    for pool_name, stats in results.items():
-        if stats['avg_gold_pulls'] is not None:
-            avg = stats['avg_gold_pulls']
-            if avg <= 20:
-                rating = "⭐⭐⭐⭐⭐ (欧皇级别)"
-            elif avg <= 40:
-                rating = "⭐⭐⭐⭐ (欧洲人)"
-            elif avg <= 60:
-                rating = "⭐⭐⭐ (正常水平)"
-            elif avg <= 80:
-                rating = "⭐⭐ (亚洲人)"
-            else:
-                rating = "⭐ (非酋)"
-            
-            current_logger.info(f"   {pool_name}: 平均{avg:.1f}抽出6星 - {rating}")
-        else:
-            current_logger.info(f"   {pool_name}: 尚未获得6星，无法评估")
-    
-    current_logger.info(f"\n💡 分析建议:")
-    current_logger.info("-" * 60)
-    
-    # 找出最佳卡池
-    best_pool = None
-    best_rate = 0
-    
-    for pool_name, stats in results.items():
-        if stats['gold_rate'] > best_rate and stats['total_pulls'] > 0:
-            best_rate = stats['gold_rate']
-            best_pool = pool_name
-    
-    if best_pool:
-        current_logger.info(f"   1. '{best_pool}'卡池表现最佳，6星获取率{best_rate:.2f}%")
-    
-    # 检查接近保底的卡池
-    pity_warning = []
-    for pool_name, stats in results.items():
-        if stats['pity_progress'] >= 50:  # 假设50抽接近保底
-            pity_warning.append((pool_name, stats['pity_progress']))
-    
-    if pity_warning:
-        current_logger.info(f"   2. 以下卡池接近保底:")
-        for pool_name, pity in pity_warning:
-            current_logger.info(f"      - {pool_name}: 已{pity}抽未出6星")
-    
-    # 总体建议
-    if total_6_star / total_pulls_all * 100 >= 3:
-        current_logger.info(f"   3. 总体运气不错，继续加油！")
-    else:
-        current_logger.info(f"   3. 6星获取率偏低，建议规划抽卡资源")
-    
-    current_logger.info(f"\n📈 可视化图表已保存:")
-    current_logger.info(f"   - gacha_analysis.png: 主要分析图表")
-    current_logger.info(f"   - gold_pull_intervals.png: 出金间隔图表")
-    current_logger.info("=" * 60)
+            report_lines.append(f"   └─ 尚未获得6星")
+    report_lines.append("=" * 60)
+
+    return "\n".join(report_lines)
 
 def analyze_history_file(history_file_path, catalog_data):
     """分析指定的抽卡记录文件"""
     try:
         logger = get_logger()
         logger.info(f"开始分析历史记录文件: {history_file_path}")
-        
+
         # 1. 加载抽卡数据
         logger.info("正在加载数据...")
         with open(history_file_path, 'r', encoding='utf-8') as f:
             gacha_data = json.load(f)
-        
+
+        game_id = gacha_data['info']['game_id']
+        game_name = gacha_data['info']['game_name']
         uid = gacha_data['info']['uid']
         logger.info(f"用户UID: {uid}")
-        
+
         # 2. 分析抽卡数据
         logger.info("正在分析抽卡记录...")
         pool_stats, item_mapping, pool_mapping = analyze_gacha_data(gacha_data, catalog_data)
-        
+
         # 3. 计算统计指标
         logger.info("正在计算统计指标...")
         results = calculate_statistics(pool_stats)
-        
+
         # 4. 创建可视化图表
         logger.info("正在生成可视化图表...")
-        create_visualizations(uid, pool_stats, results, catalog_data)
-        
-        # 5. 打印分析报告
-        logger.info("\n" + "="*60)
-        print_analysis_report(results, pool_stats, pool_mapping, item_mapping, uid)
-        
+        create_visualizations(game_name, game_id, uid, results)
+
+        # 5. 文字分析报告
+        logger.info("生成文字分析报告...")
+        report = analysis_report(results, pool_stats, pool_mapping, game_name, uid)
+        logger.info(f"{report}")
+
         logger.info("\n✅ 分析完成！")
-        
+
         # 6. 返回分析结果
         return {
             'success': True,
             'pool_stats': pool_stats,
-            'results': results,
-            'item_mapping': item_mapping,
-            'pool_mapping': pool_mapping
+            'report': report,
+            'visualizations': {
+                'gold_pull_intervals': f'gold_pull_intervals_{game_id}_{uid}.png',
+                'rarity_analysis': f'gacha_analysis_{game_id}_{uid}.png'
+            }
         }
-        
+
     except FileNotFoundError as e:
         logger.error(f"文件未找到: {e}")
         return {'success': False, 'error': str(e)}
@@ -310,7 +252,6 @@ class GachaAnalyzer:
             if not catalog_data:
                 raise ValueError(f"无法加载游戏ID {game_id} 的目录数据")
                 
-            # 直接传递catalog_data字典而不是路径
             return analyze_history_file(history_file_path, catalog_data)
         except Exception as e:
             self.logger.error(f"分析过程出错: {e}")
