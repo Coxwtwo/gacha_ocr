@@ -71,6 +71,76 @@
             ],
             "alias": "限时角色征集"
         },
+        "02067": {
+            "display_name": "石心瓦解时",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
+        "02068": {
+            "display_name": "修缮往日",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
+        "02069": {
+            "display_name": "离巢日",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
+        "02070": {
+            "display_name": "幕间蒙太奇",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
+        "02071": {
+            "display_name": "子夜独角戏",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
+        "02072": {
+            "display_name": "为什么故事集",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
+        "02073": {
+            "display_name": "零重力漫游",
+            "pool_type": "02",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
         "03036": {
             "display_name": "永恒折射角",
             "pool_type": "03",
@@ -101,11 +171,45 @@
             ],
             "alias": "限时角色征集"
         },
+        "03039": {
+            "display_name": "鸿羽若有凌云志",
+            "pool_type": "03",
+            "carry_over": true,
+            "carry_over_target": [
+                "02",
+                "03"
+            ],
+            "alias": "限时角色征集"
+        },
         "04008": {
             "display_name": "命运亦需捧场",
             "pool_type": "04",
             "carry_over": false,
             "alias": "巡游限定征集"
+        },
+        "04009": {
+            "display_name": "天真与渴盼",
+            "pool_type": "04",
+            "carry_over": false,
+            "alias": "巡游限定征集"
+        },
+        "04010": {
+            "display_name": "剪春注我",
+            "pool_type": "04",
+            "carry_over": false,
+            "alias": "新春限定征集"
+        },
+        "04011": {
+            "display_name": "赤心如昼明",
+            "pool_type": "04",
+            "carry_over": false,
+            "alias": "新春限定征集"
+        },
+        "04012": {
+            "display_name": "赤心如昼明",
+            "pool_type": "04",
+            "carry_over": false,
+            "alias": "限定复刻自选征集"
         },
         "05019": {
             "display_name": "湖的涟漪",
@@ -124,6 +228,24 @@
             "pool_type": "05",
             "carry_over": false,
             "alias": "湖的许诺"
+        },
+        "05022": {
+            "display_name": "度朔飞琼",
+            "pool_type": "05",
+            "carry_over": false,
+            "alias": "度朔飞琼"
+        },
+        "05023": {
+            "display_name": "湖的启示",
+            "pool_type": "05",
+            "carry_over": false,
+            "alias": "湖的启示3"
+        },
+        "05024": {
+            "display_name": "湖的涟漪",
+            "pool_type": "05",
+            "carry_over": false,
+            "alias": "湖的涟漪12"
         },
         "06001": {
             "display_name": "时代引导先知",
@@ -711,6 +833,31 @@
         },
         "010115": {
             "display_name": "灰调蓝",
+            "item_type": "01",
+            "rarity": 6
+        },
+        "010116": {
+            "display_name": "玛尔纱",
+            "item_type": "01",
+            "rarity": 6
+        },
+        "010117": {
+            "display_name": "伊戈尔",
+            "item_type": "01",
+            "rarity": 6
+        },
+        "010118": {
+            "display_name": "鹭鸶剪",
+            "item_type": "01",
+            "rarity": 6
+        },
+        "010119": {
+            "display_name": "程和光",
+            "item_type": "01",
+            "rarity": 6
+        },
+        "010120": {
+            "display_name": "芦草结",
             "item_type": "01",
             "rarity": 6
         },
