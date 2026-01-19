@@ -1,22 +1,40 @@
 # ui/tabs/analysis_tab.py
 from pathlib import Path
-from PySide6.QtWidgets import (
-    QWidget, 
-    QVBoxLayout, 
-    QPushButton,
-    QFileDialog, 
-    QTextEdit, 
-    QComboBox,
-    QHBoxLayout, 
-    QLabel,
-    QTabWidget,
-    QScrollArea,
-    QSlider
-)
-from PySide6.QtGui import QPixmap, QPainter, QTransform
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel as ImageLabel, QGraphicsView, QGraphicsScene
+from PySide6.QtWidgets import (
+    QWidget, QVBoxLayout, QPushButton, QFileDialog, QPushButton, 
+    QTextEdit, QComboBox, QHBoxLayout, QLabel, QTabWidget, 
+    QScrollArea, QSlider, QGraphicsView, QGraphicsScene
+)
+from PySide6.QtGui import QPixmap, QPainter, QPen, QBrush, QTransform
+
 from modules.history_analyzer import GachaAnalyzer
+
+
+class CustomGraphicsView(QGraphicsView):
+    def __init__(self, pixmap):
+        super().__init__()
+        self._pixmap = pixmap
+        self.setup_scene()
+        self.setRenderHint(QPainter.Antialiasing)
+        self.setRenderHint(QPainter.SmoothPixmapTransform)
+        self.setDragMode(QGraphicsView.ScrollHandDrag)
+        
+    def setup_scene(self):
+        """设置场景并添加图片"""
+        scene = QGraphicsScene()
+        scene.addPixmap(self._pixmap)
+        self.setScene(scene)
+    
+    def resizeEvent(self, event):
+        """当视图大小改变时，自动缩放图片以适应视图大小"""
+        super().resizeEvent(event)
+        self.fitInView_content()
+        
+    def fitInView_content(self):
+        """使图片适应视图大小，同时保持宽高比"""
+        if self.scene():
+            self.fitInView(self.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
 
 class AnalysisTab(QWidget):
@@ -56,33 +74,9 @@ class AnalysisTab(QWidget):
         # 图像项
         self.pixmap_item = None
         
-        # 创建缩放滑块
-        self.zoom_slider = QSlider(Qt.Horizontal)
-        self.zoom_slider.setMinimum(5)  # 5%
-        self.zoom_slider.setMaximum(300)  # 300%
-        self.zoom_slider.setValue(100)  # 100%
-        self.zoom_slider.valueChanged.connect(self.on_slider_changed)
-        
-        # 缩放控制按钮布局
-        zoom_layout = QHBoxLayout()
-        zoom_out_btn = QPushButton("缩小 (-)")
-        zoom_out_btn.clicked.connect(self.zoom_out)
-        
-        zoom_in_btn = QPushButton("放大 (+)")
-        zoom_in_btn.clicked.connect(self.zoom_in)
-        
-        reset_zoom_btn = QPushButton("重置")
-        reset_zoom_btn.clicked.connect(self.reset_zoom)
-        
-        zoom_layout.addWidget(zoom_out_btn)
-        zoom_layout.addWidget(self.zoom_slider)
-        zoom_layout.addWidget(zoom_in_btn)
-        zoom_layout.addWidget(reset_zoom_btn)
-        
-        # 创建包含图形视图和缩放控件的容器
+        # 创建图形视图容器
         visualization_container = QVBoxLayout()
         visualization_container.addWidget(self.graphics_view)
-        visualization_container.addLayout(zoom_layout)
         
         visualization_widget = QWidget()
         visualization_widget.setLayout(visualization_container)
@@ -192,43 +186,94 @@ class AnalysisTab(QWidget):
             self.log("分析器未初始化")
 
     def display_visualization_images(self, visualizations):
-        """在图形视图中显示所有可视化图像"""
-        self.scene.clear()
+        """在可视化图表 Tab 中显示所有可视化图像"""
+        # 获取可视化图表 Tab
+        parent_tabs = self.findChild(QTabWidget)  # 获取父级 QTabWidget
+        if not parent_tabs:
+            return
 
-        # 加载并显示每张图片
-        for image_path in visualizations.values():
+        # 创建一个新的 TabWidget 用于显示多个可视化图表
+        image_tabs = QTabWidget()
+
+        # 加载并显示图片
+        for image_name, image_path in visualizations.items():
             pixmap = QPixmap(image_path)
 
             if not pixmap.isNull():
-                self.scene.addPixmap(pixmap)
-                self.log(f"成功加载可视化图表: {image_path}")
+                # 创建一个标签页
+                tab = QWidget()
+                layout = QVBoxLayout(tab)
+
+                # 创建一个 QGraphicsView 并设置自适应大小
+                graphics_view = CustomGraphicsView(pixmap)  # 使用自定义的GraphicsView
+                
+                # 为每个图片创建独立的缩放组件
+                zoom_slider = QSlider(Qt.Horizontal)
+                zoom_slider.setMinimum(10)  # 10%
+                zoom_slider.setMaximum(300)  # 300%
+                zoom_slider.setValue(100)  # 100%
+                
+                # 创建缩放控制按钮布局
+                zoom_layout = QHBoxLayout()
+                zoom_out_btn = QPushButton("缩小 (-)")
+                zoom_out_btn.clicked.connect(lambda: self.zoom_out(zoom_slider))
+                
+                zoom_in_btn = QPushButton("放大 (+)")
+                zoom_in_btn.clicked.connect(lambda: self.zoom_in(zoom_slider))
+                
+                reset_zoom_btn = QPushButton("重置")
+                reset_zoom_btn.clicked.connect(lambda: self.reset_zoom(zoom_slider))
+                
+                zoom_layout.addWidget(zoom_out_btn)
+                zoom_layout.addWidget(zoom_slider)
+                zoom_layout.addWidget(zoom_in_btn)
+                zoom_layout.addWidget(reset_zoom_btn)
+                
+                # 连接缩放滑块事件
+                zoom_slider.valueChanged.connect(
+                    lambda value, gv=graphics_view, zs=zoom_slider: self.on_slider_changed(value, gv, zs)
+                )
+
+                # 添加到标签页
+                layout.addWidget(graphics_view)
+                layout.addLayout(zoom_layout)  # 添加缩放控制组件到底部
+                tab.setLayout(layout)
+                
+                image_tabs.addTab(tab, image_name.replace('_', ' ').title())  # 使用图片名称作为标签标题
             else:
                 self.log(f"未找到可视化图表文件: {image_path}")
 
-        # 重置缩放
-        self.reset_zoom()
+        # 替换原来的可视化图表 Tab
+        parent_tabs.removeTab(1)  # 移除原来的"可视化图表" Tab
+        parent_tabs.addTab(image_tabs, "可视化图表")  # 添加新的图片 Tab
+        parent_tabs.setTabText(1, "可视化图表")  # 确保标签名称正确
 
-    def display_visualization_image(self, image_path):
-        """在图形视图中显示指定路径的可视化图像"""
-        pixmap = QPixmap(image_path)
+        self.log("可视化图表已加载到标签页中")
 
-        if not pixmap.isNull():
-            # 清除场景中的现有项目
-            self.scene.clear()
+    def zoom_in(self, zoom_slider):
+        """针对每个视图的放大图片"""
+        current_value = zoom_slider.value()
+        new_value = min(current_value + 10, zoom_slider.maximum())
+        zoom_slider.setValue(new_value)
 
-            # 添加新图片
-            self.pixmap_item = self.scene.addPixmap(pixmap)
+    def zoom_out(self, zoom_slider):
+        """针对每个视图的缩小图片"""
+        current_value = zoom_slider.value()
+        new_value = max(current_value - 10, zoom_slider.minimum())
+        zoom_slider.setValue(new_value)
 
-            # 重置缩放
-            self.reset_zoom()
+    def reset_zoom(self, zoom_slider):
+        """针对每个视图的重置缩放"""
+        zoom_slider.setValue(100)
 
-            # 输出找到的文件名
-            self.log(f"成功加载可视化图表: {image_path}")
-        else:
-            # 如果找不到图片，显示提示文本
-            self.scene.clear()
-            text_item = self.scene.addText("未找到可视化图表文件")
-            self.log("未找到可视化图表文件")
+    def on_slider_changed(self, value, graphics_view, zoom_slider):
+        """针对每个视图的滑块值改变时的处理"""
+        # 计算缩放比例
+        scale_factor = value / 100.0
+        
+        transform = QTransform()
+        transform.scale(scale_factor, scale_factor)
+        graphics_view.setTransform(transform)
 
     def extract_uid_from_json(self):
         """从JSON文件中提取UID"""
@@ -242,32 +287,5 @@ class AnalysisTab(QWidget):
                 self.log(f"无法从JSON文件中提取UID: {e}")
                 return ''
         return ''
-
-    def zoom_in(self):
-        """放大图片"""
-        current_value = self.zoom_slider.value()
-        new_value = min(current_value + 10, self.zoom_slider.maximum())
-        self.zoom_slider.setValue(new_value)
-
-    def zoom_out(self):
-        """缩小图片"""
-        current_value = self.zoom_slider.value()
-        new_value = max(current_value - 10, self.zoom_slider.minimum())
-        self.zoom_slider.setValue(new_value)
-
-    def reset_zoom(self):
-        """重置缩放"""
-        self.zoom_slider.setValue(100)
-
-    def on_slider_changed(self, value):
-        """滑块值改变时的处理"""
-        # 计算缩放比例
-        scale_factor = value / 100.0
-        
-        # 应用变换
-        transform = QTransform()
-        transform.scale(scale_factor, scale_factor)
-        self.graphics_view.setTransform(transform)
-
     def log(self, text):
         self.log_output.append(text)
