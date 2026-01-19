@@ -51,16 +51,13 @@ def fix_timestamp_format(ts: str) -> Optional[str]:
     return None
 
 def clean_name_string(name: str, prefix_patterns: List[str], suffix_patterns: List[str]) -> str:
-    """
-    清理名称字符串，去除前后缀
-    """
+    """清理名称中的前缀和后缀"""
+    cleaned = name
     for pattern in prefix_patterns:
-        if name.startswith(pattern):
-            name = name[len(pattern):]
+        cleaned = re.sub(pattern, "", cleaned).strip()
     for pattern in suffix_patterns:
-        if name.endswith(pattern):
-            name = name[:-len(pattern)]
-    return name.strip()
+        cleaned = re.sub(pattern, "", cleaned).strip()
+    return cleaned
 
 def calculate_edit_distance(s1: str, s2: str) -> int:
     """
