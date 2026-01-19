@@ -17,9 +17,6 @@ from PySide6.QtGui import QPixmap, QPainter, QTransform
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel as ImageLabel, QGraphicsView, QGraphicsScene
 from modules.history_analyzer import GachaAnalyzer
-import io
-import sys
-from contextlib import redirect_stderr, redirect_stdout
 
 
 class AnalysisTab(QWidget):
@@ -32,6 +29,7 @@ class AnalysisTab(QWidget):
 
         # 游戏选择下拉框
         self.game_combo = QComboBox()
+        self.game_combo.currentTextChanged.connect(self.on_game_changed)
 
         # 默认历史文件目录
         self.default_history_dir = "data/history"
@@ -124,12 +122,27 @@ class AnalysisTab(QWidget):
     def _init_games(self):
         """初始化游戏列表"""
         if self.config_manager:
-            games = self.config_manager.get_available_games()
-            self.game_combo.addItems(games)
+            # 获取游戏列表，返回格式为 [(game_id, game_name), ...]
+            games = self.config_manager.get_available_games_with_names()
+            
+            for game_id, game_name in games:
+                self.game_combo.addItem(game_name, game_id)  # 显示名称，存储ID
+                
             if games:
-                self.current_game = games[0]
+                self.current_game_id = games[0][0]  # 设置第一个游戏的ID
+                self.current_game_name = games[0][1]  # 设置第一个游戏的名称
         else:
             self.log("配置管理器未初始化")
+
+    def on_game_changed(self, game_name):
+        """当游戏改变时的处理"""
+        # 获取选中项的数据（存储的游戏ID）
+        current_index = self.game_combo.currentIndex()
+        if current_index >= 0:
+            self.current_game_id = self.game_combo.itemData(current_index)
+            self.current_game_name = game_name
+            
+            self.log(f"切换到游戏: {game_name}")
 
     def load_json(self):
         # 使用默认历史目录作为起始路径
@@ -148,7 +161,7 @@ class AnalysisTab(QWidget):
             self.log("加载历史文件：" + path)
 
     def run_analysis(self):
-        if not hasattr(self, 'current_game'):
+        if not hasattr(self, 'current_game_id'):
             self.log("请先选择游戏")
             return
 
@@ -159,88 +172,58 @@ class AnalysisTab(QWidget):
         # 使用GachaAnalyzer进行分析
         if self.analyzer:
             try:
-                # 重定向输出以捕获日志内容
-                old_stdout = sys.stdout
-                old_stderr = sys.stderr
-                captured_output = io.StringIO()
-                
-                try:
-                    sys.stdout = captured_output
-                    sys.stderr = captured_output
-                    
-                    result = self.analyzer.analyze(self.json_path, self.current_game)
-                    
-                    # 恢复标准输出
-                    sys.stdout = old_stdout
-                    sys.stderr = old_stderr
-                    
-                    # 获取捕获的输出
-                    output_text = captured_output.getvalue()
-                    
-                    if result['success']:
-                        self.log("分析完成！")
-                        self.log(f"总共分析了 {len(result['pool_stats'])} 个卡池")
+                result = self.analyzer.analyze(self.json_path, self.current_game_id)
 
-                        # 显示分析报告（使用捕获的日志输出作为报告内容）
-                        self.report_area.setPlainText(output_text)
+                if result['success']:
+                    self.log("分析完成！")
+                    self.log(f"总共分析了 {len(result['pool_stats'])} 个卡池")
 
-                        # 显示可视化图表 - 通过QGraphicsView显示
-                        self.display_visualization_image()
+                    # 显示分析报告
+                    self.report_area.setPlainText(result['report'])
 
-                    else:
-                        self.log(f"分析失败: {result['error']}")
-                        # 也显示捕获的错误输出
-                        if output_text:
-                            self.report_area.setPlainText(output_text)
-                        
-                finally:
-                    # 确保始终恢复标准输出
-                    sys.stdout = old_stdout
-                    sys.stderr = old_stderr
+                    # 显示可视化图表
+                    self.display_visualization_images(result['visualizations'])
+                else:
+                    self.log(f"分析失败: {result.get('error', '未知错误')}")
 
             except Exception as e:
                 self.log(f"分析过程中出现错误: {e}")
         else:
             self.log("分析器未初始化")
 
-    def display_visualization_image(self):
-        """在图形视图中显示可视化图像"""
-        # 尝试从JSON中提取UID以确定正确的图像文件名
-        uid = self.extract_uid_from_json()
-        
-        # 尝试多个可能的文件名
-        possible_filenames = [
-            f'gacha_analysis_{uid}.png' if uid else None,
-            'gacha_analysis.png',
-            f'gacha_analysis_{uid}.jpg' if uid else None,
-            'gacha_analysis.jpg'
-        ]
-        
-        # 过滤掉None值
-        possible_filenames = [f for f in possible_filenames if f is not None]
-        
-        pixmap = None
-        found_file = None
-        
-        for filename in possible_filenames:
-            temp_pixmap = QPixmap(filename)
-            if not temp_pixmap.isNull():
-                pixmap = temp_pixmap
-                found_file = filename
-                break
-        
-        if pixmap and not pixmap.isNull():
+    def display_visualization_images(self, visualizations):
+        """在图形视图中显示所有可视化图像"""
+        self.scene.clear()
+
+        # 加载并显示每张图片
+        for image_path in visualizations.values():
+            pixmap = QPixmap(image_path)
+
+            if not pixmap.isNull():
+                self.scene.addPixmap(pixmap)
+                self.log(f"成功加载可视化图表: {image_path}")
+            else:
+                self.log(f"未找到可视化图表文件: {image_path}")
+
+        # 重置缩放
+        self.reset_zoom()
+
+    def display_visualization_image(self, image_path):
+        """在图形视图中显示指定路径的可视化图像"""
+        pixmap = QPixmap(image_path)
+
+        if not pixmap.isNull():
             # 清除场景中的现有项目
             self.scene.clear()
-            
+
             # 添加新图片
             self.pixmap_item = self.scene.addPixmap(pixmap)
-            
+
             # 重置缩放
             self.reset_zoom()
-            
+
             # 输出找到的文件名
-            self.log(f"成功加载可视化图表: {found_file}")
+            self.log(f"成功加载可视化图表: {image_path}")
         else:
             # 如果找不到图片，显示提示文本
             self.scene.clear()

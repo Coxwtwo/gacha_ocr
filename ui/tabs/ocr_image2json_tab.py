@@ -133,17 +133,27 @@ class BatchTab(QWidget):
     def _init_games(self):
         """初始化游戏列表"""
         if self.config_manager:
-            games = self.config_manager.get_available_games()
-            self.game_combo.addItems(games)
+            # 获取游戏列表，返回格式为 [(game_id, game_name), ...]
+            games = self.config_manager.get_available_games_with_names()
+            
+            for game_id, game_name in games:
+                self.game_combo.addItem(game_name, game_id)  # 显示名称，存储ID
+                
             if games:
-                self.current_game = games[0]
+                self.current_game_id = games[0][0]  # 设置第一个游戏的ID
+                self.current_game_name = games[0][1]  # 设置第一个游戏的名称
         else:
             self.log("配置管理器未初始化")
 
-    def on_game_changed(self, game_id):
+    def on_game_changed(self, game_name):
         """当游戏改变时的处理"""
-        self.current_game = game_id
-        self.log(f"切换到游戏: {game_id}")
+        # 获取选中项的数据（存储的游戏ID）
+        current_index = self.game_combo.currentIndex()
+        if current_index >= 0:
+            self.current_game_id = self.game_combo.itemData(current_index)
+            self.current_game_name = game_name
+            
+            self.log(f"切换到游戏: {game_name}")
 
     def select_dir(self):
         start_dir = self.default_image_dir
@@ -154,7 +164,7 @@ class BatchTab(QWidget):
             self.image_dir = path
 
     def run_batch(self):
-        if not hasattr(self, 'current_game'):
+        if not hasattr(self, 'current_game_id'):
             self.log("请先选择游戏")
             return
             
@@ -176,7 +186,7 @@ class BatchTab(QWidget):
         try:
             result = self.processor.process_images(
                 image_source=self.image_dir,
-                game_id=self.current_game,
+                game_id=self.current_game_id,
                 uid=uid,
                 timezone=timezone
             )
