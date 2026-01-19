@@ -10,6 +10,7 @@ data/errors/*
 logs
 
 # application file
+build/
 dist/
 
 # other
