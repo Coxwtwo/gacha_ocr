@@ -417,7 +417,7 @@ class OcrImageProcessor:
     
     def __init__(self, config_manager: ConfigManager):
         self.config_manager = config_manager
-        self.logger = get_logger(config_manager)
+        self.logger = get_logger()
     
     def process_images(self, image_source: Union[str, List[str]], game_id: str, uid: str, 
                       timezone: int = 8, lang: str = "zh-cn", output_dir: str = "data/history",
