@@ -22,7 +22,7 @@
     "patterns": {
       "prefix_patterns": [],
       "suffix_patterns": [
-        "\\(\\d+.*?\\)"
+        "\\(\\d+[^)]*\\)"
       ]
     }
   }
