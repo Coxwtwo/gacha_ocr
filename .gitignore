@@ -9,5 +9,8 @@ data/history/*
 data/errors/*
 logs
 
+# application file
+dist/
+
 # other
 GitReference.txt
